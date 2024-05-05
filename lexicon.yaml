@@ -1,0 +1,6 @@
+tasks:
+- check_sf_parking_tickets: Check your outstanding SFMTA parking tickets. Checks at
+    https://wmq.etimspayments.com/pbw/include/sanfrancisco/input.jsp
+- hello_world: Prints hello world and datetime
+- double_number: Double the value of a given number.
+- solve_imo_problem: Solve International Math Olympiad Problems

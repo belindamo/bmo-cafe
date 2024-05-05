@@ -1,0 +1,8 @@
+description: Check your outstanding SFMTA parking tickets. Checks at https://wmq.etimspayments.com/pbw/include/sanfrancisco/input.jsp
+required:
+  car_license
+  car_state
+generated_with:
+  type: person
+runtime:
+  asyncio: True
