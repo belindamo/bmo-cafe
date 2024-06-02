@@ -1,3 +1,6 @@
 my_data.yaml
 _scratch
+docs
+learn
 __pycache__/
+**/streams/**

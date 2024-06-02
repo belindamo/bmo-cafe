@@ -8,76 +8,21 @@ from datetime import datetime
 from schedule_task import schedule_task, check_scheduled_task
 from update_lexicon import update_lexicon
 from generate_task import generate_task
-
-client = OpenAI()
+from models.oai import gpt
 
 COMMANDS = """
 - l: list all tasks
-- g: generate a new task
-- r <task_name>: run an existing task
-- t <task_name>: run test for an existing task
-- s <task_name> <"daily" or every number of seconds>: schedule a task
+- t <task_name>: run test suite for an existing task
 - a: see all scheduled tasks
+- s <task_name> <"daily" || number of seconds>: schedule a task (human-edited tasks only)
+- g: generate a coding task and test set (input and output are numbers only)
+- r <task_name>: run an existing task once (human-edited tasks only)
 - q: quit
-- or just chat with me ☕️"""
+- type something else to just chat with me ☕️"""
 
-OPENAI_TOKEN_COST = {
-    'gpt-4': {
-        'input': 30 / 1000000,
-        'output': 60 / 1000000
-    },
-    'gpt-4-32k': {
-        'input': 60 / 1000000,
-        'output': 120 / 1000000
-    },
-    'gpt-3.5-turbo-0125': {
-        'input': 0.5 / 1000000,
-        'output': 1.5 / 1000000
-    },
-    'gpt-3.5-turbo-instruct': {
-        'input': 1.5 / 1000000,
-        'output': 2 / 1000000
-    },
-}
+# --- Model Instance class ---
 
-last_request_usage = {
-    'input_cost': 0,
-    'output_cost': 0,
-    'input': 0,
-    'output': 0,
-}
-total_usage = {
-    'input_cost': 0,
-    'output_cost': 0,
-    'input': 0,
-    'output': 0,
-}
-
-# --- Helpers ---
-
-# This is abstracted out in order to track number of tokens.
-def openai_request(*args, **kwargs):
-    response = client.chat.completions.create(*args, **kwargs)
-
-    # Get the token usage information from the API response
-    token_usage = response.usage
-    
-    # Update token usage
-    last_request_usage['input'] = token_usage.prompt_tokens
-    last_request_usage['output'] = token_usage.completion_tokens
-    last_request_usage['input_cost'] = token_usage.prompt_tokens * OPENAI_TOKEN_COST[kwargs['model']]['input'] 
-    last_request_usage['output_cost'] = token_usage.completion_tokens * OPENAI_TOKEN_COST[kwargs['model']]['output']
-    total_usage['input'] += last_request_usage['input']
-    total_usage['output'] += last_request_usage['output']
-    total_usage['input_cost'] += last_request_usage['input_cost']
-    total_usage['output_cost'] += last_request_usage['output_cost']
-
-    return response
-
-
-# --- Kiks ---
-
-class Kik:
+class ModelInstance:
     def __init__(self, folder_path):
         self.name = folder_path
         with open(f"{folder_path}/index.yaml", 'r') as file:
@@ -95,7 +40,7 @@ class Kik:
     
     def _system_prompt(self):
         if not hasattr(self, 'description') or not hasattr(self, 'actions') or not hasattr(self, 'values'):
-            raise AttributeError("Required attributes 'description', 'actions', or 'values' not defined for Kik.")
+            raise AttributeError("Required attributes 'description', 'actions', or 'values' not defined for ModelInstance.")
         
         return f"""
         {self.description}
@@ -110,11 +55,7 @@ class Kik:
     def get_response(self, user_input):
         self.messages.append({'role': 'user', 'content': user_input})
         
-        response = openai_request(
-            model=self.model,
-            messages=self.messages
-        )
-        text = response.choices[0].message.content.strip()
+        text = gpt(self.model, messages=self.messages)
         self.messages.append({'role': 'assistant', 'content': text})
         return text
 
@@ -169,13 +110,12 @@ class Kik:
 
 def initialize():
     global master
-    master = Kik('master')
-    master.print_debug_info()
+    master = ModelInstance('master')
+    # Uncomment this to print debug information
+    # master.print_debug_info()
 
 # Updates all files at the end of session.
 def end_session():
-  # Updates vocabulary.yaml and kik index.yamls based on kiks
-
   end_message = "\nThank you for coming to bmo.cafe. Goodbye!"
   print(end_message)
 
@@ -352,6 +292,7 @@ def main():
     initialize()
 
     print("""Welcome to bmo.cafe ☕️ How can I help you today?""")
+    print("Actions:")
     print(COMMANDS)
 
     while True:
@@ -382,11 +323,6 @@ def main():
                 text_response = master.get_response(user_input)
                 print(text_response)
                 print(COMMANDS)
-            
-                # print('---')
-                # print(f"Tokens and cost used for this request: {last_request_usage['input'] + last_request_usage['output']} tokens / ${round(last_request_usage['input_cost'] + last_request_usage['output_cost'], 4)}")
-                
-                # print(f"Tokens and cost used in total: {total_usage['input'] + total_usage['output']} tokens / ${round(total_usage['input_cost'] + total_usage['output_cost'], 4)}")
             
         except KeyboardInterrupt:
             end_session()

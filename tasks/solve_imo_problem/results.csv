@@ -1,7 +1,0 @@
-"A4. Let $a_{0}, a_{1}, a_{2}, \ldots$ be a sequence of real numbers such that $a_{0}=0, a_{1}=1$, and for every $n \geqslant 2$ there exists $1 \leqslant k \leqslant n$ satisfying
-
-$$
-a_{n}=\frac{a_{n-1}+\cdots+a_{n-k}}{k}
-$$
-
-Find the maximal possible value of $a_{2018}-a_{2017}$.",$\frac{2016}{2017^{2}}$,1/2017

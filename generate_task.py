@@ -12,8 +12,7 @@ def generate_code(prompt: str):
   '''
   tries = 0
   while tries < 5:
-    response = gpt('gpt-4-0613', prompt)
-    code = response.answer
+    code = gpt('gpt-4-0613', prompt)
     try:
       exec(code)
       print(f'Try #{tries+1} to generate code SUCCESS: {code}')
@@ -35,11 +34,11 @@ def generate_test_set(prompt: str):
   '''
   tries = 0
   while tries < 5:
-    response = gpt('gpt-4-0613', prompt)
+    tests = gpt('gpt-4-0613', prompt)
     try:
-        test_set = json.loads(response.answer)
+        test_set = json.loads(tests)
     except json.decoder.JSONDecodeError:
-        print(f'Try #{tries+1} generate test_set FAIL: model answer {response.answer} is not a list. \n Trying again.')
+        print(f'Try #{tries+1} generate test_set FAIL: model answer {tests} is not a list. \n Trying again.')
         tries += 1
         continue
 

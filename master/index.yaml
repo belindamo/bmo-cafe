@@ -1,4 +1,4 @@
-description: 'You will help with any requests by breaking down tasks, executing them, and testing them. Your name is Kiki, the leader of the kiks.'
+description: 'You will help with any requests by breaking down tasks, executing them, and testing them.'
 model: 'gpt-3.5-turbo-0125'
 actions:
   - create_new_task
