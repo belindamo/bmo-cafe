@@ -3,4 +3,3 @@ tasks:
     https://wmq.etimspayments.com/pbw/include/sanfrancisco/input.jsp
 - hello_world: Prints hello world and datetime
 - double_number: Double a given number.
-- triple_number: Triple a number.
